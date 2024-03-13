@@ -1,0 +1,55 @@
+import os
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
+import pandas as pd
+ 
+
+
+from tensorflow import keras
+20
+# define cnn model
+def define_model():
+    model = Sequential()
+    model.add(Conv2D(32, (3, 3), 
+                     activation='relu', 
+                     kernel_initializer='he_uniform', 
+                     padding='same', 
+                     input_shape=(200, 200, 3)))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(Flatten())
+    model.add(Dense(128, activation='relu', kernel_initializer='he_uniform'))
+    model.add(Dense(1, activation='sigmoid'))
+    # compile model
+    opt = keras.optimizers.SGD(lr=0.001, momentum=0.9)
+    model.compile(optimizer=opt, loss='binary_crossentropy', metrics=['accuracy'])
+    model.summary()
+    return model
+
+
+
+# define model
+model = define_model()
+
+data_home = '/home/sw900b2_sanjay/MLv/DeepLearning/day5/cat-dogs/'
+
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+datagen = ImageDataGenerator(rescale=1.0/255.0)
+
+train_it = datagen.flow_from_directory(data_home + '/train/',
+    class_mode='binary', batch_size=64, target_size=(200, 200))
+test_it = datagen.flow_from_directory(data_home + '/test/',
+    class_mode='binary', batch_size=64, target_size=(200, 200))
+
+
+history = model.fit(train_it, 
+                    steps_per_epoch=len(train_it),
+                    validation_data=test_it, 
+                    validation_steps=len(test_it), 
+                    epochs=1, 
+                    verbose=1)
+
+_, acc = model.evaluate(test_it, steps=len(test_it), verbose=0)
+print('Validation accuracy: %.3f' % (acc * 100.0))
+
+print(history.history)
