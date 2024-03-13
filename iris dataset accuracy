@@ -1,0 +1,47 @@
+import tensorflow as tf
+import pandas as pd
+import numpy as np
+from tensorflow.keras import layers,models
+from tensorflow.keras.utils import to_categorical
+from sklearn.preprocessing import LabelEncoder
+
+
+df=pd.read_csv("iris.csv")
+print(df.head())
+
+X=df.iloc[:,0:4].values
+y=df.iloc[:,4].values
+
+print(X[0:5])
+print(y[0:5])
+print(X.shape)
+print(y.shape)
+
+encoder=LabelEncoder()
+y1=encoder.fit_transform(y)
+
+y=pd.get_dummies(y1).values
+
+print(y1.shape)
+
+model=tf.keras.Sequential([tf.keras.layers.Dense(10,activation='relu'),
+                           tf.keras.layers.Dense(10,activation='relu'),
+                           tf.keras.layers.Dense(3,activation='softmax')])
+
+model.compile(optimizer='rmsprop', loss='categorical_crossentropy',metrics=['accuracy'])
+
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.2)
+
+
+print(X_train.shape)
+print(X_test.shape)
+print(y_train.shape)
+print(y_test.shape)
+model.fit(X_train,y_train,batch_size=10,epochs=50)
+loss,accuracy=model.evaluate(X_test,y_test,verbose=0)
+print("Test loss",loss)
+print("Test accuracy",accuracy)
+
+
+print(model.summary())
